@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Генератор іконок — Yarema Bus</title>
+    <title>Генератор іконок — Esco Express</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; }
@@ -25,7 +25,7 @@
 </head>
 <body>
 
-<h1>Генератор іконок Yarema Bus</h1>
+<h1>Генератор іконок Esco Express</h1>
 <p class="subtitle">Натисни кнопку — скачаєш всі файли одразу</p>
 
 <div class="grid">
@@ -59,7 +59,7 @@
 <button class="btn btn-all" onclick="downloadAll()">⬇ Скачати всі файли</button>
 
 <p class="note">
-    Після завантаження — закинь всі файли на хостинг в папку з Pasanger_Yarema.html:<br>
+    Після завантаження — закинь всі файли на хостинг в папку з Pasanger_Esco.html:<br>
     <b>icon-180.png, icon-192.png, icon-512.png, og-image.png</b>
 </p>
 
@@ -86,17 +86,17 @@ function drawIcon(canvasId, size) {
     ctx.textBaseline = 'middle';
     ctx.fillText('🚐', size / 2, size * 0.35);
 
-    // YAREMA
+    // ESCO
     ctx.fillStyle = 'white';
     ctx.font = '800 ' + (size * 0.15) + 'px Montserrat, Arial, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('YAREMA', size / 2, size * 0.62);
+    ctx.fillText('ESCO', size / 2, size * 0.62);
 
-    // BUS
+    // EXPRESS
     ctx.fillStyle = '#d90d0d';
     ctx.font = '800 ' + (size * 0.12) + 'px Montserrat, Arial, sans-serif';
-    ctx.fillText('BUS', size / 2, size * 0.80);
+    ctx.fillText('EXPRESS', size / 2, size * 0.80);
 }
 
 // ── OG Image (1200×630) ──
@@ -127,15 +127,15 @@ function drawOG() {
     ctx.textBaseline = 'middle';
     ctx.fillText('🚐', 600, 180);
 
-    // YAREMA
+    // ESCO
     ctx.fillStyle = 'white';
     ctx.font = '900 72px Montserrat, Arial, sans-serif';
-    ctx.fillText('YAREMA', 600, 320);
+    ctx.fillText('ESCO', 600, 320);
 
-    // BUS
+    // EXPRESS
     ctx.fillStyle = '#d90d0d';
     ctx.font = '800 56px Montserrat, Arial, sans-serif';
-    ctx.fillText('BUS', 600, 400);
+    ctx.fillText('EXPRESS', 600, 400);
 
     // Підпис
     ctx.fillStyle = 'rgba(255,255,255,0.5)';

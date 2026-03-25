@@ -1,7 +1,7 @@
 {
-  "name": "Yarema Bus CRM",
-  "short_name": "Yarema CRM",
-  "description": "CRM Пасажири — Yarema Bus",
+  "name": "Esco Express CRM",
+  "short_name": "Esco Express",
+  "description": "CRM Пасажири — Esco Express",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

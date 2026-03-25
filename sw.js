@@ -1,5 +1,5 @@
-// Yarema Bus Service Worker — потрібен для PWA встановлення
-var CACHE_NAME = 'yarema-crm-v1';
+// Esco Express Service Worker — потрібен для PWA встановлення
+var CACHE_NAME = 'esco-express-crm-v1';
 
 // Install — просто активуємось
 self.addEventListener('install', function(e) {

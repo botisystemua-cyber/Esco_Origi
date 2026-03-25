@@ -6,22 +6,22 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Yarema Bus">
+    <meta name="apple-mobile-web-app-title" content="Esco Express">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a3a5e">
-    <meta name="application-name" content="Yarema Bus CRM">
+    <meta name="application-name" content="Esco Express CRM">
     <!-- Open Graph — прев'ю в месенджерах (Telegram, WhatsApp, Viber) -->
-    <meta property="og:title" content="Yarema Bus CRM">
-    <meta property="og:description" content="CRM Пасажири — Yarema Bus">
-    <meta property="og:image" content="https://botisystem.com/Yarema_Bus/og-image.png">
-    <meta property="og:url" content="https://botisystem.com/Yarema_Bus/">
+    <meta property="og:title" content="Esco Express CRM">
+    <meta property="og:description" content="CRM Пасажири — Esco Express">
+    <meta property="og:image" content="https://botisystem.com/Esco_Express/og-image.png">
+    <meta property="og:url" content="https://botisystem.com/Esco_Express/">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Yarema Bus">
+    <meta property="og:site_name" content="Esco Express">
     <!-- PWA іконки -->
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="manifest" href="manifest.json">
-    <title>Yarema Bus CRM Пасажири v2</title>
+    <title>Esco Express CRM Пасажири v2</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -1147,7 +1147,7 @@
 <header class="header">
     <div class="header-top">
         <button class="burger-btn" onclick="openSideMenu()">☰</button>
-        <div class="logo">Yarema<span>Bus</span></div>
+        <div class="logo">Esco<span>Express</span></div>
         <div class="search-box">
             <span class="search-icon">🔍</span>
             <input class="search-input" type="text" id="globalSearch" placeholder="Пошук по ПІБ або телефону..." oninput="onSearchInput()">
@@ -1844,15 +1844,15 @@
         ctx.font = (size * 0.35) + 'px serif';
         ctx.textAlign = 'center';
         ctx.fillText('🚐', size / 2, size * 0.42);
-        // Текст Yarema Bus
+        // Текст Esco Express
         ctx.fillStyle = 'white';
         ctx.font = '800 ' + (size * 0.18) + 'px Montserrat, Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('YAREMA', size / 2, size * 0.62);
+        ctx.fillText('ESCO', size / 2, size * 0.62);
         ctx.fillStyle = '#d90d0d';
         ctx.font = '800 ' + (size * 0.15) + 'px Montserrat, Arial, sans-serif';
-        ctx.fillText('BUS', size / 2, size * 0.82);
+        ctx.fillText('EXPRESS', size / 2, size * 0.82);
         return c.toDataURL('image/png');
     }
 
@@ -1886,8 +1886,8 @@
     }).catch(function() {
         // Fallback — inline manifest (для Google Apps Script)
         var m = {
-            name: 'Yarema Bus CRM', short_name: 'Yarema CRM',
-            description: 'CRM Пасажири — Yarema Bus',
+            name: 'Esco Express CRM', short_name: 'Esco Express',
+            description: 'CRM Пасажири — Esco Express',
             start_url: location.href, display: 'standalone',
             orientation: 'portrait', theme_color: '#1a3a5e', background_color: '#f5f7fa',
             icons: [
@@ -1926,7 +1926,7 @@ function installApp() {
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then(function(result) {
             if (result.outcome === 'accepted') {
-                showToast('Yarema Bus встановлено!');
+                showToast('Esco Express встановлено!');
                 var banner = document.getElementById('installBanner');
                 if (banner) banner.style.display = 'none';
             }
@@ -3382,7 +3382,7 @@ function updateAppBadge(count) {
         }
     }
     // 2. Оновлюємо title сторінки — видно в табах і на деяких платформах
-    const baseTitle = 'Yarema Bus CRM';
+    const baseTitle = 'Esco Express CRM';
     document.title = count > 0 ? '(' + count + ') ' + baseTitle : baseTitle;
 
     // 3. Динамічний favicon з лічильником (працює скрізь)

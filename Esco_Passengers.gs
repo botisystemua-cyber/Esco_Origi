@@ -1,6 +1,6 @@
 // ================================================================
-// Yarema_Bus_Passengers.gs — CRM Пасажири (менеджери)
-// Живе в таблиці: Passengers_crm_Yarema
+// Esco_Express_Passengers.gs — CRM Пасажири (менеджери)
+// Живе в таблиці: Passengers_crm_Esco_Express
 // Deploy: Web App → доступ "Будь-хто"
 // ================================================================
 //
@@ -84,13 +84,13 @@ var DATA_START = 2;
 
 // ── ВСІ ТАБЛИЦІ СИСТЕМИ (SpreadsheetApp.openById) ──
 var DB = {
-  PASSENGERS: '1xJFRRkQquOdqK2gmSkd05pwDfJNje3ylf4yETM8abcE',
-  POSYLKI:    '1VhWTnsmvSy9uTAcYqLvr-Q5VHbvlDZmfTsmAxUzJh4g',
-  MARHRUT:    '1SxfXQ0E05D7OuZNa7oRQMsiLu2kNNYnnJgtcSEATAbQ',
-  KLIYENTU:   '1VCKct8J83S2_t1Qld76blTj1n-r9oMgtVgwa7zS-PeY',
-  FINANCE:    '1jQBbXOggrKfyCSDARLTgBt-SXwPKqhp-RUVtq162r4c',
-  CONFIG:     '1rfgMaZJg0fDlDpLI5id4ul-3z4jqC3OwwBWrYsQseJI',
-  ARCHIVE:    '1JF_j8vE_GMer5NwJmYJR02CyzvtdPqZVpuCevH9VPr4'
+  PASSENGERS: '10SZhKV08BJyvWoMwhT0iddtWzYrDYFjCM8xgqViuE3Y',
+  POSYLKI:    '1lgaCHqWBIa6oFjFWfD8m58sLwbvQjmeje2gx3YAnBCo',
+  MARHRUT:    '1KW2Vh_E7OxggNB_NOzWmVM8siHzHr_mG8C939YXDC38',
+  KLIYENTU:   '1AhID7Ust45sA4PCAUjWJz515qnxzQGSj5wGQ7K8Jbu0',
+  FINANCE:    '1hZ67tuQYukugO_TjNsOS3IjovBR5hWMg-JmGAq5udBE',
+  CONFIG:     '19Ftljah5eX07RLHJaBrvYV7hStxspxcJVi6VATGZvF0',
+  ARCHIVE:    '1_vfEhdLEM2SVTBiu_3eDilMs1HlKxvPrJBbiHYjgrJo'
 };
 
 // Головна таблиця цього скрипта
@@ -2255,7 +2255,7 @@ function doGet(e) {
   try {
     switch (action) {
       case 'ping':
-        result = { ok: true, message: 'Yarema Bus CRM v3 API', version: '3.0', timestamp: new Date().toISOString() };
+        result = { ok: true, message: 'Esco Express CRM v3 API', version: '3.0', timestamp: new Date().toISOString() };
         break;
       case 'getAll':
         result = apiGetAll({ sheet: e.parameter.sheet || 'all', filter: {} });
