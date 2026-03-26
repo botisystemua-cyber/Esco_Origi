@@ -308,11 +308,12 @@
         .messenger-overlay.show { display: flex; }
         @media (max-width: 768px) {
             .messenger-overlay.show { align-items: stretch; justify-content: flex-end; }
-            .messenger-popup { border-radius: 16px 0 0 16px; padding: 20px 16px; min-width: 0; max-width: 200px; width: 200px; height: 100%; display: flex; flex-direction: column; justify-content: center; animation: slideInRight .2s ease-out; }
-            .messenger-popup-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
-            .messenger-popup-item { padding: 14px 12px !important; font-size: 14px !important; border-radius: 12px !important; min-height: 48px; justify-content: flex-start !important; }
-            .messenger-popup-title { font-size: 14px; margin-bottom: 16px; }
-            .messenger-popup-cancel { margin-top: 16px; padding: 14px; font-size: 14px; border-radius: 12px; }
+            .messenger-popup { border-radius: 14px 0 0 14px; padding: 12px 10px; min-width: 0; max-width: 160px; width: 160px; height: auto; max-height: 100%; display: flex; flex-direction: column; justify-content: center; animation: slideInRight .2s ease-out; box-shadow: -4px 0 20px rgba(0,0,0,0.15); }
+            .messenger-popup-grid { grid-template-columns: 1fr !important; gap: 6px !important; }
+            .messenger-popup-item { padding: 10px 12px !important; font-size: 12px !important; border-radius: 20px !important; min-height: 0 !important; justify-content: flex-start !important; background: #f1f5f9 !important; color: var(--text-primary) !important; border: none !important; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+            .messenger-popup-item:active { transform: scale(0.96); }
+            .messenger-popup-title { font-size: 11px; margin-bottom: 10px; color: var(--text-secondary); }
+            .messenger-popup-cancel { margin-top: 10px; padding: 10px; font-size: 11px; border-radius: 20px; }
         }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .messenger-popup { background: white; border-radius: 14px; padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); min-width: 240px; max-width: 300px; }
@@ -4038,12 +4039,12 @@ function toggleCardActions(id) {
 function openMessengerPopup(phone, smartId) {
     const grid = document.getElementById('messengerGrid');
     const cleanPhone = (phone || '').replace(/[^+\d]/g, '');
-    var smartBtn = `<button class="messenger-popup-item" onclick="openSmartSender('${smartId || ''}')" style="background:#ff6600;color:white;border-color:#ff6600">🤖 Smart</button>`;
+    var smartBtn = `<button class="messenger-popup-item" onclick="openSmartSender('${smartId || ''}')">🤖 <span style="color:#ff6600">Smart</span></button>`;
     grid.innerHTML = `
-        <button class="messenger-popup-item" onclick="closeMessengerPopup(); window.open('tel:${cleanPhone}')" style="background:var(--primary);color:white;border-color:var(--primary)">📞 Дзвінок</button>
-        <button class="messenger-popup-item" onclick="openMessenger('viber','${cleanPhone}')" style="background:#7360f2;color:white;border-color:#7360f2">💬 Viber</button>
-        <button class="messenger-popup-item" onclick="openMessenger('telegram','${cleanPhone}')" style="background:#0088cc;color:white;border-color:#0088cc">✈️ Telegram</button>
-        <button class="messenger-popup-item" onclick="openMessenger('whatsapp','${cleanPhone}')" style="background:#25d366;color:white;border-color:#25d366">📱 WhatsApp</button>
+        <button class="messenger-popup-item" onclick="closeMessengerPopup(); window.open('tel:${cleanPhone}')">📞 <span style="color:var(--primary)">Дзвінок</span></button>
+        <button class="messenger-popup-item" onclick="openMessenger('viber','${cleanPhone}')">💬 <span style="color:#7360f2">Viber</span></button>
+        <button class="messenger-popup-item" onclick="openMessenger('telegram','${cleanPhone}')">✈️ <span style="color:#0088cc">Telegram</span></button>
+        <button class="messenger-popup-item" onclick="openMessenger('whatsapp','${cleanPhone}')">📱 <span style="color:#25d366">WhatsApp</span></button>
         ${smartBtn}
     `;
     document.getElementById('messengerOverlay').classList.add('show');
