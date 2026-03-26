@@ -4030,7 +4030,7 @@ function toggleCardActions(id) {
 function openMessengerPopup(phone, smartId) {
     const grid = document.getElementById('messengerGrid');
     const cleanPhone = (phone || '').replace(/[^+\d]/g, '');
-    var smartBtn = (smartId && smartId.trim()) ? `<button class="messenger-popup-item" onclick="openSmartSender('${smartId}')" style="background:#ff6600;color:white;border-color:#ff6600">🤖 Smart</button>` : '';
+    var smartBtn = `<button class="messenger-popup-item" onclick="openSmartSender('${smartId || ''}')" style="background:#ff6600;color:white;border-color:#ff6600">🤖 Smart</button>`;
     grid.innerHTML = `
         <button class="messenger-popup-item" onclick="closeMessengerPopup(); window.open('tel:${cleanPhone}')" style="background:var(--primary);color:white;border-color:var(--primary)">📞 Дзвінок</button>
         <button class="messenger-popup-item" onclick="openMessenger('viber','${cleanPhone}')" style="background:#7360f2;color:white;border-color:#7360f2">💬 Viber</button>
