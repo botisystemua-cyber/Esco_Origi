@@ -225,7 +225,9 @@
         /* === КАРТКА ЛІДА: Мета-рядок (дата рейсу, дата реєстрації, SmartSender ID) === */
         .card-meta-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
         .card-meta-tag { font-size: 9px; color: var(--text-secondary); background: var(--bg-main); padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
-        .card-smart-id { font-size: 9px; color: #7c3aed; background: #f3e8ff; padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+        .card-smart-id { font-size: 11px; font-weight: 600; color: #7c3aed; background: #f3e8ff; padding: 2px 8px; border-radius: 4px; white-space: nowrap; cursor: pointer; transition: background .15s; }
+        .card-smart-id:hover { background: #e9d5ff; }
+        .card-smart-id:active { background: #d8b4fe; }
 
         .card-right-section { display: flex; align-items: center; justify-content: center; padding: 6px 8px; border-left: 1px solid var(--border); flex-shrink: 0; }
         /* Trip strip — повна ширина внизу картки */
@@ -3693,7 +3695,7 @@ function renderCard(p) {
                     <div class="card-row2-wrap">
                         <div class="card-info-row">
                             ${cf.includes('pax_id') ? `<span class="card-id">${id}</span>` : ''}
-                            ${cf.includes('smartId') ? `<span class="card-smart-id">SS: ${smartId || '—'}</span>` : ''}
+                            ${cf.includes('smartId') ? `<span class="card-smart-id" onclick="event.stopPropagation(); copyToClipboard('${smartId || ''}'); this.style.background='#d8b4fe'; setTimeout(()=>this.style.background='',400);" title="Натисни щоб скопіювати">SS: ${smartId || '—'}</span>` : ''}
                             ${cf.includes('name') ? `<span class="card-name">${name}</span>` : ''}
                             ${isRecent24h ? '<span class="badge badge-new24">🆕 NEW</span>' : ''}
                             ${cf.includes('leadStatus') ? lsBadge : ''} ${cf.includes('payStatus') ? payBadge : ''}
