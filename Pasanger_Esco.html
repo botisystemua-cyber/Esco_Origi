@@ -4032,15 +4032,16 @@ function toggleDetails(id) {
 function toggleCardActions(id) {
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
-        // Мобільна версія — бокова панель справа
         const p = passengers.find(x => x['PAX_ID'] === id);
         if (!p) return;
         const cleanPhone = (p['Телефон пасажира'] || '').replace(/[^+\d]/g, '');
         const smartId = p['Ід_смарт'] || '';
-        const name = (p['Піб'] || '').replace(/'/g, "\\'");
+        const pib = p['Піб'] || 'Без імені';
+        const name = pib.replace(/'/g, "\\'");
         const sheet = (p._sheet || '').replace(/'/g, "\\'");
         const panel = document.getElementById('mobileActionsPanel');
         panel.innerHTML = `
+            <div style="font-size:11px;font-weight:700;color:var(--primary);margin-bottom:6px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${pib}</div>
             <button class="btn-card-action btn-call" onclick="closeMobileActions(); window.open('tel:${cleanPhone}')">📞 Дзвінок</button>
             <button class="btn-card-action btn-write" onclick="closeMobileActions(); openMessengerPopup('${cleanPhone}','${smartId}')">✉️ Писати</button>
             <button class="btn-card-action btn-edit" onclick="closeMobileActions(); openEditPax('${id}')">✏️ Редагувати</button>
@@ -4048,6 +4049,7 @@ function toggleCardActions(id) {
             <button class="btn-card-action btn-write" onclick="closeMobileActions(); openTagModal('${id}')">🏷 Тег</button>
             <button class="btn-card-action btn-write" onclick="closeMobileActions(); archivePax('${id}','${name}')">📦 Архів</button>
             <button class="btn-card-action btn-delete" onclick="closeMobileActions(); deletePax('${id}','${sheet}','${name}')">🗑️ Видалити</button>
+            <button style="width:100%;margin-top:4px;padding:6px;border:none;border-radius:16px;background:#e2e8f0;color:var(--text-secondary);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;" onclick="closeMobileActions()">✕ Закрити</button>
         `;
         document.getElementById('mobileActionsOverlay').classList.add('show');
         return;
