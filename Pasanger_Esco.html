@@ -7442,7 +7442,8 @@ function openTagModal(singlePaxId) {
 
     const names = _tagTargetIds.map(id => {
         const p = passengers.find(x => x['PAX_ID'] === id);
-        return p ? (p['Піб'] || id) : id;
+        const ss = p ? String(p['Ід_смарт'] || '').trim() : '';
+        return (p ? (p['Піб'] || id) : id) + (ss ? ' <span style="color:#7c3aed;">(SS: ' + ss + ')</span>' : '');
     });
     let info = _tagTargetIds.length === 1
         ? 'Лід: <b>' + names[0] + '</b>'
@@ -7486,7 +7487,7 @@ async function applyTag() {
             const data = await res.json();
             if (data.state) {
                 ok++;
-                html += '<div style="color:#059669;">✅ ' + t.name + (data.note ? ' (вже був)' : '') + '</div>';
+                html += '<div style="color:#059669;">✅ ' + t.name + ' <span style="color:#7c3aed;font-size:10px;">(SS: ' + t.smartId + ')</span>' + (data.note ? ' — вже був' : '') + '</div>';
                 // Оновлюємо локальне поле Тег
                 const p = passengers.find(x => x['PAX_ID'] === t.paxId);
                 if (p) {
@@ -7497,11 +7498,11 @@ async function applyTag() {
                 }
             } else {
                 fail++;
-                html += '<div style="color:#dc2626;">❌ ' + t.name + ': ' + (data.error || 'Помилка') + '</div>';
+                html += '<div style="color:#dc2626;">❌ ' + t.name + ' <span style="color:#7c3aed;font-size:10px;">(SS: ' + t.smartId + ')</span>: ' + (data.error || 'Помилка') + '</div>';
             }
         } catch (e) {
             fail++;
-            html += '<div style="color:#dc2626;">❌ ' + t.name + ': ' + e.message + '</div>';
+            html += '<div style="color:#dc2626;">❌ ' + t.name + ' <span style="color:#7c3aed;font-size:10px;">(SS: ' + t.smartId + ')</span>: ' + e.message + '</div>';
         }
     }
 
