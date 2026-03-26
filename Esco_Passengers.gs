@@ -905,10 +905,12 @@ function updateCalendarOccupancy(calId) {
     var info = getAllData(sh);
     var calIdx = info.headers.indexOf('CAL_ID');
     var pibIdx = info.headers.indexOf('Піб');
+    var seatsIdx = info.headers.indexOf('Кількість місць');
     if (calIdx === -1) return;
     for (var i = 0; i < info.data.length; i++) {
       if (String(info.data[i][calIdx]) === String(calId)) {
-        count++;
+        var seats = (seatsIdx !== -1) ? (parseInt(info.data[i][seatsIdx]) || 1) : 1;
+        count += seats;
         if (pibIdx !== -1 && info.data[i][pibIdx]) {
           paxNames.push(String(info.data[i][pibIdx]));
         }
