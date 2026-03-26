@@ -889,6 +889,7 @@ function apiReassignTrip(params) {
 }
 
 // Оновити зайнятість рейсу
+// [БАҐФІКС] count += seats (Кількість місць), а не count++ (кількість лідів)
 function updateCalendarOccupancy(calId) {
   var calSheet = getSheet(SHEETS.CALENDAR);
   if (!calSheet) return;
