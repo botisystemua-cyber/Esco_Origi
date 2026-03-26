@@ -967,10 +967,17 @@
             .card-phone { min-width: auto; font-size: 12px; }
             .card-right-section { padding: 4px 6px; }
             .trips-grid { grid-template-columns: 1fr; }
-            /* Mobile: кнопки дій — компактні, заокруглені, випуклі */
-            .btn-card-action { padding: 6px 10px; font-size: 10px; min-height: 32px; border-radius: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-            .card-actions { gap: 5px; }
-            .card-actions .btn-card-action { min-width: 60px; flex: 1 1 calc(33% - 5px); }
+            /* Mobile: кнопки дій — бокова панель справа */
+            .card-actions.show { display: none !important; }
+            .card-actions-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 200; align-items: center; justify-content: flex-end; }
+            .card-actions-overlay.show { display: flex; }
+            .card-actions-panel { background: white; border-radius: 12px 0 0 12px; padding: 10px 8px; width: 140px; box-shadow: -4px 0 16px rgba(0,0,0,0.15); animation: slideInRight .2s ease-out; display: flex; flex-direction: column; gap: 4px; }
+            .card-actions-panel .btn-card-action { padding: 7px 10px; font-size: 11px; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); min-height: 0; width: 100%; justify-content: flex-start; background: #f1f5f9; color: var(--text-primary); }
+            .card-actions-panel .btn-card-action.btn-call { background: #f1f5f9; color: var(--primary); }
+            .card-actions-panel .btn-card-action.btn-write { background: #f1f5f9; color: var(--primary); }
+            .card-actions-panel .btn-card-action.btn-edit { background: #f1f5f9; color: var(--primary); }
+            .card-actions-panel .btn-card-action.btn-delete { background: #fef2f2; color: #dc2626; }
+            .card-actions-panel .btn-card-action:active { transform: scale(0.96); }
             /* Mobile: кнопки рейсів/маршрутів */
             .trip-card-actions { flex-wrap: wrap; gap: 6px; }
             .trip-action-btn { padding: 10px 8px; font-size: 12px; min-height: 44px; flex: 1 1 auto; }
@@ -1637,6 +1644,11 @@
             <button class="confirm-btn yes" onclick="confirmResult(true)">Підтвердити</button>
         </div>
     </div>
+</div>
+
+<!-- MOBILE ACTIONS PANEL -->
+<div class="card-actions-overlay" id="mobileActionsOverlay" onclick="if(event.target===this)closeMobileActions()">
+    <div class="card-actions-panel" id="mobileActionsPanel"></div>
 </div>
 
 <!-- MESSENGER POPUP -->
@@ -4015,17 +4027,42 @@ function toggleDetails(id) {
 }
 
 function toggleCardActions(id) {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        // Мобільна версія — бокова панель справа
+        const p = passengers.find(x => x['PAX_ID'] === id);
+        if (!p) return;
+        const cleanPhone = (p['Телефон пасажира'] || '').replace(/[^+\d]/g, '');
+        const smartId = p['Ід_смарт'] || '';
+        const name = (p['Піб'] || '').replace(/'/g, "\\'");
+        const sheet = (p._sheet || '').replace(/'/g, "\\'");
+        const panel = document.getElementById('mobileActionsPanel');
+        panel.innerHTML = `
+            <button class="btn-card-action btn-call" onclick="closeMobileActions(); window.open('tel:${cleanPhone}')">📞 Дзвінок</button>
+            <button class="btn-card-action btn-write" onclick="closeMobileActions(); openMessengerPopup('${cleanPhone}','${smartId}')">✉️ Писати</button>
+            <button class="btn-card-action btn-edit" onclick="closeMobileActions(); openEditPax('${id}')">✏️ Редагувати</button>
+            <button class="btn-card-action btn-write" onclick="closeMobileActions(); toggleTripAssignDD('${id}')">🚐 Рейс</button>
+            <button class="btn-card-action btn-write" onclick="closeMobileActions(); openTagModal('${id}')">🏷 Тег</button>
+            <button class="btn-card-action btn-write" onclick="closeMobileActions(); archivePax('${id}','${name}')">📦 Архів</button>
+            <button class="btn-card-action btn-delete" onclick="closeMobileActions(); deletePax('${id}','${sheet}','${name}')">🗑️ Видалити</button>
+        `;
+        document.getElementById('mobileActionsOverlay').classList.add('show');
+        return;
+    }
     if (openActionsId === id) {
         openActionsId = null;
     } else {
         openActionsId = id;
-        // Закриваємо деталі при відкритті дій — щоб не було хаосу на мобільному
         if (openDetailsId === id) {
             openDetailsId = null;
             delete activeDetailTab[id];
         }
     }
     render();
+}
+
+function closeMobileActions() {
+    document.getElementById('mobileActionsOverlay').classList.remove('show');
 }
 
 // ================================================================
