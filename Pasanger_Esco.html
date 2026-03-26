@@ -4801,8 +4801,10 @@ async function savePassenger() {
         });
         if (localExact) {
             saveBtn.disabled = false; saveBtn.textContent = origText; saveBtn.style.opacity = '';
-            showConfirm('❌ Дублікат! Телефон + дата збігаються:\n\n' + (localExact['Піб'] || '—') + '\n📞 ' + localExact['Телефон пасажира'] + '\n📅 ' + localExact['Дата виїзду'] + '\n\nТакий пасажир вже є в системі!', function(yes) {});
-            return;
+            const confirmed = await new Promise(resolve => {
+                showConfirm('⚠️ Можливий дублікат!\n\nТелефон + дата збігаються:\n' + (localExact['Піб'] || '—') + '\n📞 ' + localExact['Телефон пасажира'] + '\n📅 ' + localExact['Дата виїзду'] + '\n\nДодати все одно?', resolve);
+            });
+            if (!confirmed) return;
         }
     }
 
