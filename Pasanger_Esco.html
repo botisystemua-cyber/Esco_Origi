@@ -257,6 +257,8 @@
         .detail-tab:hover { border-color: var(--primary); color: var(--primary); background: #eef2ff; }
         .detail-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
         .detail-tab .tab-count { font-size: 9px; font-weight: 700; background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 8px; }
+        .detail-accordion-tabs.mobile-tabs { flex-wrap: nowrap; gap: 3px; padding: 6px 6px; }
+        .mobile-tabs .detail-tab { flex: 1; justify-content: center; padding: 4px 4px; font-size: 10px; min-width: 0; }
         .detail-extra-tabs { display: none; flex-wrap: wrap; gap: 4px; padding: 4px 10px 8px; background: #f1f5f9; }
         .detail-extra-tabs.show { display: flex; }
         .detail-tab-sub { font-size: 10px !important; padding: 3px 8px !important; }
@@ -3797,23 +3799,24 @@ function renderDetails(p) {
     const activeIdx = savedIdx >= 0 ? savedIdx : 0;
     const isMobile = window.innerWidth <= 768;
 
-    // Мобільна версія: Основне, Фінанси, Маршрут, Додатково
+    // Мобільна версія: Основне, Фінанси, Маршрут, ⚙️ (Додатково)
     const MOBILE_MAIN_KEYS = ['osnovne', 'finance', 'route'];
-    const mobileExtraOpen = activeDetailTab[paxId + '_extra'] || false;
+    const MOBILE_SHORT_TITLES = { 'osnovne': '👤 Осн.', 'finance': '💰 Фін.', 'route': '🗺️ Марш.' };
 
     // Tabs row (horizontal)
-    let tabsHtml = '<div class="detail-accordion-tabs">';
+    let tabsHtml = `<div class="detail-accordion-tabs${isMobile ? ' mobile-tabs' : ''}">`;
     sections.forEach((section, i) => {
-        if (isMobile && !MOBILE_MAIN_KEYS.includes(section.key)) return; // Сховані в "Додатково"
+        if (isMobile && !MOBILE_MAIN_KEYS.includes(section.key)) return;
+        const label = isMobile ? (MOBILE_SHORT_TITLES[section.key] || section.title) : section.title;
         const countLabel = section.async ? '' : `<span class="tab-count">${section.fields.length}</span>`;
         tabsHtml += `<div class="detail-tab ${i===activeIdx?'active':''}" onclick="event.stopPropagation(); switchDetailTab('${paxId}','${section.key}',this)" data-section="${section.key}">
-            ${section.title} ${countLabel}
+            ${label} ${countLabel}
         </div>`;
     });
     if (isMobile) {
         const extraActive = !MOBILE_MAIN_KEYS.includes(sections[activeIdx]?.key);
         tabsHtml += `<div class="detail-tab ${extraActive?'active':''}" onclick="event.stopPropagation(); toggleMobileExtra('${paxId}',this)" data-section="_extra">
-            📋 Додатково
+            ⚙️
         </div>`;
     }
     tabsHtml += '</div>';
