@@ -4716,33 +4716,31 @@ async function savePassenger() {
         return;
     }
 
-    // CREATE MODE — локальна перевірка дублікатів (надійніша за API)
-    const nameLower = name.toLowerCase().trim();
-    const phoneDigits = phone.replace(/\D/g, ''); // тільки цифри
-    // Також перевіряємо останні 9 цифр (без коду країни)
+    // CREATE MODE — локальна перевірка дублікатів
+    // Точний дубль: Телефон + Дата виїзду збігаються
+    // М'який дубль: тільки Телефон збігається (інша дата)
+    const phoneDigits = phone.replace(/\D/g, '');
     const phoneTail = phoneDigits.length >= 9 ? phoneDigits.slice(-9) : phoneDigits;
     let localExact = null, localSoft = null;
     for (const p of passengers) {
-        const pName = String(p['Піб'] || '').toLowerCase().trim();
         const pDigits = String(p['Телефон пасажира'] || '').replace(/\D/g, '');
         const pTail = pDigits.length >= 9 ? pDigits.slice(-9) : pDigits;
         const pDate = String(p['Дата виїзду'] || '').trim();
         const phoneMatch = phoneTail && pTail && (phoneDigits === pDigits || phoneTail === pTail);
-        if (pName === nameLower && phoneMatch && pDate === date && nameLower && date) {
+        if (!phoneMatch) continue;
+        if (pDate === date && date) {
             localExact = p; break;
         }
-        if (!localSoft && pName === nameLower && phoneMatch && nameLower) {
-            localSoft = p;
-        }
+        if (!localSoft) localSoft = p;
     }
     if (localExact) {
         saveBtn.disabled = false; saveBtn.textContent = origText; saveBtn.style.opacity = '';
-        showConfirm('❌ Точний дублікат!\n\n' + localExact['Піб'] + '\n' + localExact['Телефон пасажира'] + '\n\nТакий запис вже існує. Скасувати?', function(yes) {});
+        showConfirm('❌ Дублікат! Телефон + дата збігаються:\n\n' + (localExact['Піб'] || '—') + '\n📞 ' + localExact['Телефон пасажира'] + '\n📅 ' + localExact['Дата виїзду'] + '\n\nТакий пасажир вже є в системі!', function(yes) {});
         return;
     }
     if (localSoft) {
         const confirmed = await new Promise(resolve => {
-            showConfirm('⚠️ Схожий запис знайдено!\n\n' + localSoft['Піб'] + '\n' + localSoft['Телефон пасажира'] + '\n\nЗберегти все одно?', resolve);
+            showConfirm('⚠️ Цей телефон вже є в системі!\n\n' + (localSoft['Піб'] || '—') + '\n📞 ' + localSoft['Телефон пасажира'] + '\n📅 ' + (localSoft['Дата виїзду'] || 'без дати') + '\n\nДодати ще одного пасажира з цим номером?', resolve);
         });
         if (!confirmed) {
             saveBtn.disabled = false; saveBtn.textContent = origText; saveBtn.style.opacity = '';
