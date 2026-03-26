@@ -1658,10 +1658,30 @@
     <div class="bulk-toolbar-grid">
         <button class="bulk-toolbar-btn assign" onclick="openBulkTripDropdown(event)">🚐 Рейс</button>
         <button class="bulk-toolbar-btn route" onclick="openRouteAssignModal()">🗺️ Маршрут</button>
+        <button class="bulk-toolbar-btn" style="background:#f59e0b;color:white;" onclick="openTagModal()">🏷 Теги</button>
         <button class="bulk-toolbar-btn optimize" onclick="bulkOptimize()">⚡ Оптиміз.</button>
         <button class="bulk-toolbar-btn" style="background:#f3f4f6;color:#6b7280;" onclick="bulkArchive()">📦 Архів</button>
     </div>
     <div class="bulk-trip-dd" id="bulkTripDd"></div>
+</div>
+
+<!-- TAG MODAL -->
+<div class="modal-overlay" id="tagModal" onclick="if(event.target===this)closeModal('tagModal')">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header">
+            <span class="modal-title" id="tagModalTitle">🏷 Присвоїти тег</span>
+            <button class="modal-close" onclick="closeModal('tagModal')">×</button>
+        </div>
+        <div class="modal-body" style="padding:12px;">
+            <div class="form-group"><label>Назва тегу</label><input type="text" id="tagNameInput" placeholder="Введіть назву тегу..." onkeydown="if(event.key==='Enter')applyTag()"></div>
+            <div id="tagTargetInfo" style="font-size:11px;color:var(--text-secondary);margin-top:4px;"></div>
+            <div id="tagResult" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;font-size:11px;font-weight:600;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('tagModal')">Скасувати</button>
+            <button class="btn-save" onclick="applyTag()">🏷 Застосувати</button>
+        </div>
+    </div>
 </div>
 
 <!-- ROUTE ASSIGN MODAL -->
@@ -3700,6 +3720,7 @@ function renderCard(p) {
             <button class="btn-card-action btn-write" onclick="event.stopPropagation(); openMessengerPopup('${cleanPhone}','${smartId}')">✉️ Писати</button>
             <button class="btn-card-action btn-edit" onclick="event.stopPropagation(); openEditPax('${id}')">✏️ Редагувати</button>
             <button class="btn-card-action" style="background:#ede9fe;color:#7c3aed;" onclick="event.stopPropagation(); toggleTripAssignDD('${id}')">🚐 Рейс</button>
+            <button class="btn-card-action" style="background:#fef3c7;color:#92400e;" onclick="event.stopPropagation(); openTagModal('${id}')">🏷 Тег</button>
             <button class="btn-card-action" style="background:#f3f4f6;color:#6b7280;" onclick="event.stopPropagation(); archivePax('${id}','${name}')">📦 Архів</button>
             <button class="btn-card-action btn-delete" onclick="deletePax('${id}','${p._sheet||''}','${name}')">🗑️ Видалити</button>
         </div>
@@ -7391,6 +7412,112 @@ function bulkArchive() {
             showToast('❌ ' + (res.error || 'Помилка'));
         }
     });
+}
+
+// ── Smart Sender: Теги ──
+const TAG_API_URL = 'https://botisystem.com/Esco_Express/smart_teg.php';
+var _tagTargetIds = []; // PAX_IDs для яких застосовуємо тег
+
+function openTagModal(singlePaxId) {
+    _tagTargetIds = [];
+    if (singlePaxId) {
+        _tagTargetIds = [singlePaxId];
+    } else {
+        _tagTargetIds = Array.from(selectedIds);
+    }
+    if (!_tagTargetIds.length) { showToast('Оберіть лідів'); return; }
+
+    // Перевіряємо що всі мають Ід_смарт
+    const noSmart = _tagTargetIds.filter(id => {
+        const p = passengers.find(x => x['PAX_ID'] === id);
+        return !p || !p['Ід_смарт'] || String(p['Ід_смарт']).trim() === '';
+    });
+
+    document.getElementById('tagNameInput').value = '';
+    const resultEl = document.getElementById('tagResult');
+    resultEl.style.display = 'none';
+    resultEl.innerHTML = '';
+
+    const names = _tagTargetIds.map(id => {
+        const p = passengers.find(x => x['PAX_ID'] === id);
+        return p ? (p['Піб'] || id) : id;
+    });
+    let info = _tagTargetIds.length === 1
+        ? 'Лід: <b>' + names[0] + '</b>'
+        : 'Лідів: <b>' + _tagTargetIds.length + '</b> (' + names.slice(0, 3).join(', ') + (_tagTargetIds.length > 3 ? '...' : '') + ')';
+    if (noSmart.length > 0) {
+        info += '<br><span style="color:var(--danger);">⚠️ ' + noSmart.length + ' без Ід_смарт — буде пропущено</span>';
+    }
+    document.getElementById('tagTargetInfo').innerHTML = info;
+    document.getElementById('tagModalTitle').textContent = _tagTargetIds.length === 1 ? '🏷 Присвоїти тег' : '🏷 Теги (' + _tagTargetIds.length + ' лідів)';
+    openModal('tagModal');
+    setTimeout(() => document.getElementById('tagNameInput').focus(), 100);
+}
+
+async function applyTag() {
+    const tagName = document.getElementById('tagNameInput').value.trim();
+    if (!tagName) { showToast('Введіть назву тегу'); return; }
+
+    const targets = _tagTargetIds.map(id => {
+        const p = passengers.find(x => x['PAX_ID'] === id);
+        return { paxId: id, smartId: p ? String(p['Ід_смарт'] || '').trim() : '', name: p ? (p['Піб'] || id) : id };
+    }).filter(t => t.smartId);
+
+    if (!targets.length) { showToast('Немає лідів з Ід_смарт'); return; }
+
+    const resultEl = document.getElementById('tagResult');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '⏳ Надсилаю тег «' + tagName + '» для ' + targets.length + ' контакт(ів)...';
+    resultEl.style.background = '#f0f9ff';
+    resultEl.style.color = '#0369a1';
+
+    let ok = 0, fail = 0;
+    let html = '';
+
+    for (const t of targets) {
+        try {
+            const res = await fetch(TAG_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: t.smartId, tagName: tagName })
+            });
+            const data = await res.json();
+            if (data.state) {
+                ok++;
+                html += '<div style="color:#059669;">✅ ' + t.name + (data.note ? ' (вже був)' : '') + '</div>';
+                // Оновлюємо локальне поле Тег
+                const p = passengers.find(x => x['PAX_ID'] === t.paxId);
+                if (p) {
+                    const old = p['Тег'] || '';
+                    if (!old.includes(tagName)) {
+                        p['Тег'] = old ? old + ', ' + tagName : tagName;
+                    }
+                }
+            } else {
+                fail++;
+                html += '<div style="color:#dc2626;">❌ ' + t.name + ': ' + (data.error || 'Помилка') + '</div>';
+            }
+        } catch (e) {
+            fail++;
+            html += '<div style="color:#dc2626;">❌ ' + t.name + ': ' + e.message + '</div>';
+        }
+    }
+
+    resultEl.innerHTML = '<div style="margin-bottom:6px;font-size:12px;"><b>Результат:</b> ✅ ' + ok + ' / ❌ ' + fail + '</div>' + html;
+    resultEl.style.background = fail === 0 ? '#f0fdf4' : '#fef2f2';
+    resultEl.style.color = '#1f2937';
+
+    if (ok > 0) {
+        showToast('✅ Тег «' + tagName + '» додано: ' + ok + ' контакт(ів)');
+        // Зберігаємо тег в CRM (Google Sheets) для кожного ліда
+        for (const t of targets) {
+            const p = passengers.find(x => x['PAX_ID'] === t.paxId);
+            if (p) {
+                await apiPost('updateField', { sheet: p._sheet || '', pax_id: t.paxId, col: 'Тег', value: p['Тег'] || tagName });
+            }
+        }
+        render();
+    }
 }
 
 // ── Відновлення з архіву ──
