@@ -211,6 +211,7 @@
         .dir-badge-eu-ua { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #047857; }
         .card-phone { font-size: 14px; font-weight: 700; color: var(--primary); letter-spacing: 0.3px; white-space: nowrap; }
         .card-seats { background: var(--info); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+        .card-seat-num { background: #e0e7ff; color: #4338ca; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: 700; flex-shrink: 0; }
         .card-date { background: var(--bg-main); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; flex-shrink: 0; white-space: nowrap; }
         .card-price-wrap { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; margin-left: auto; }
         .card-price { font-size: 14px; font-weight: 700; color: var(--success); flex-shrink: 0; }
@@ -3853,7 +3854,7 @@ function renderCard(p) {
                     <div class="card-top-row">
                         ${cf.includes('direction') ? `<span class="card-direction ${dirColorClass}">${dirLabel}</span>` : ''}
                         ${cf.includes('phone') ? `<span class="card-phone" onclick="event.stopPropagation(); copyToClipboard('${cleanPhone}'); this.style.color='#059669'; setTimeout(()=>this.style.color='',400);" title="Натисни щоб скопіювати" style="cursor:pointer;">${phone}</span>` : ''}
-                        ${cf.includes('seats') ? `<span class="card-seats">${seats}м</span>` : ''}
+                        ${cf.includes('seats') ? `<span class="card-seats">${seats}м</span>` : ''}${cf.includes('seatInCar') && seatInCar ? `<span class="card-seat-num">💺${seatInCar}</span>` : ''}
                         ${cf.includes('date') ? `<span class="card-date">${date || '—'}</span>` : ''}
                         ${cf.includes('price') || cf.includes('deposit') ? `<div class="card-price-wrap">
                             ${cf.includes('price') ? `<span class="card-price">${price ? price + ' ' + curr : '—'}</span>` : ''}
@@ -3872,7 +3873,6 @@ function renderCard(p) {
                         </div>
                         ${cf.includes('route') ? routeHtml : ''}
                         <div class="card-meta-row">
-                            ${cf.includes('seatInCar') && seatInCar ? '<span class="card-meta-tag">💺 '+seatInCar+'</span>' : ''}
                             ${cf.includes('tripDate') && tripDateStr ? '<span class="card-meta-tag">🗓 Рейс: '+tripDateStr+'</span>' : ''}
                             ${cf.includes('dateCreated') && dateCreated && dateCreated !== '—' ? '<span class="card-meta-tag">📅 Реєстр: '+dateCreated+'</span>' : ''}
                         </div>
