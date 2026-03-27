@@ -2407,7 +2407,23 @@ document.addEventListener('DOMContentLoaded', () => {
         apiPost('getRoutesList', {})
     ]).then(([paxRes, tripRes, routeRes]) => {
         hideLoader();
-        if (paxRes.ok) passengers = paxRes.data;
+        if (paxRes.ok) {
+            passengers = paxRes.data;
+            // Перераховуємо борги та статуси оплати при завантаженні
+            passengers.forEach(p => {
+                const price = parseFloat(p['Ціна квитка']) || 0;
+                const wp = parseFloat(p['Ціна багажу']) || 0;
+                const dep = parseFloat(p['Завдаток']) || 0;
+                const debt = Math.max(0, price + wp - dep);
+                p['Борг'] = debt;
+                const status = p['Статус оплати'] || '';
+                if (status !== 'Оплачено') {
+                    if (price > 0 && dep === 0) p['Статус оплати'] = 'Не оплачено';
+                    else if (price > 0 && dep > 0 && debt > 0) p['Статус оплати'] = 'Частково';
+                    else if (price > 0 && debt === 0) p['Статус оплати'] = 'Оплачено';
+                }
+            });
+        }
         if (tripRes.ok) trips = tripRes.data;
         if (routeRes.ok && routeRes.data) {
             allRouteSheets = routeRes.data.map(s => ({
