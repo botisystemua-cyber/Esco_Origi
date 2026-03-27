@@ -2419,10 +2419,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const price = parseFloat(p['Ціна квитка']) || 0;
                 const dep = parseFloat(p['Завдаток']) || 0;
                 const status = p['Статус оплати'] || '';
+                const currentDebt = parseFloat(p['Борг']);
                 if (status === 'Оплачено') {
                     p['Борг'] = 0;
                 } else if (price > 0) {
-                    if (!p['Борг'] && p['Борг'] !== 0) p['Борг'] = price;
+                    // Борг = ціна, якщо борг ще не заповнений
+                    if (isNaN(currentDebt) || String(p['Борг']).trim() === '') p['Борг'] = price;
                     if (dep > 0) p['Статус оплати'] = 'Частково';
                     else p['Статус оплати'] = 'Не оплачено';
                 }
