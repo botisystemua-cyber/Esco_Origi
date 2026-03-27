@@ -605,24 +605,31 @@ function apiUpdateField(params) {
   sh.getRange(found.rowNum, colIdx + 1).setValue(params.value);
 
   // Перерахунок боргу + автооновлення статусу оплати
+  // [ЛОГІКА БОРГУ + СТАТУСУ ОПЛАТИ]
+  // Борг = ціна квитка (оператор коригує вручну, завдаток НЕ віднімається)
+  // Не оплачено: є ціна, немає завдатку
+  // Частково: є ціна + є завдаток
+  // Оплачено: тільки вручну оператором (не автоматично)
   if (['Ціна квитка','Ціна багажу','Завдаток'].indexOf(params.col) !== -1) {
     var obj = rowToObj(found.headers, found.data);
     obj[params.col] = params.value;
-    var debt = calcDebt(obj);
-    var debtIdx = found.headers.indexOf('Борг');
-    if (debtIdx !== -1) {
-      sh.getRange(found.rowNum, debtIdx + 1).setValue(debt);
+    var price = parseFloat(obj['Ціна квитка']) || 0;
+    var dep = parseFloat(obj['Завдаток']) || 0;
+    var currentPayStatus = obj['Статус оплати'] || '';
+
+    // Борг = ціна (при зміні ціни оновлюємо борг)
+    if (params.col === 'Ціна квитка') {
+      var debtIdx = found.headers.indexOf('Борг');
+      if (debtIdx !== -1) sh.getRange(found.rowNum, debtIdx + 1).setValue(price);
     }
 
-    // Автооновлення Статус оплати (Y)
-    var dep = parseFloat(obj['Завдаток']) || 0;
-    var price = parseFloat(obj['Ціна квитка']) || 0;
-    var newPayStatus = 'Не оплачено';
-    if (dep > 0 && debt > 0) newPayStatus = 'Частково';
-    if (dep > 0 && debt === 0) newPayStatus = 'Оплачено';
-    var payStatusIdx = found.headers.indexOf('Статус оплати');
-    if (payStatusIdx !== -1) {
-      sh.getRange(found.rowNum, payStatusIdx + 1).setValue(newPayStatus);
+    // Статус оплати — НЕ чіпаємо якщо вже "Оплачено"
+    if (currentPayStatus !== 'Оплачено') {
+      var newPayStatus = price > 0 ? (dep > 0 ? 'Частково' : 'Не оплачено') : '';
+      var payStatusIdx = found.headers.indexOf('Статус оплати');
+      if (payStatusIdx !== -1 && newPayStatus) {
+        sh.getRange(found.rowNum, payStatusIdx + 1).setValue(newPayStatus);
+      }
     }
 
     // Автозапис платежу в Finance_crm при зміні Завдаток (S)
@@ -638,6 +645,12 @@ function apiUpdateField(params) {
         addPayment(paxData, params.manager || '', delta);
       }
     }
+  }
+
+  // Якщо оператор вручну поставив "Оплачено" → борг = 0
+  if (params.col === 'Статус оплати' && params.value === 'Оплачено') {
+    var debtIdx2 = found.headers.indexOf('Борг');
+    if (debtIdx2 !== -1) sh.getRange(found.rowNum, debtIdx2 + 1).setValue(0);
   }
 
   return { ok: true };
