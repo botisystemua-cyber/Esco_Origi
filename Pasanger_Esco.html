@@ -1541,7 +1541,7 @@
             <div class="form-row">
                 <div class="form-group"><label>Ціна квитка</label><input type="text" id="fPrice"></div>
                 <div class="form-group"><label>Валюта квитка</label>
-                    <select id="fCurrency"><option value="UAH">UAH</option><option value="EUR">EUR</option><option value="CHF">CHF</option><option value="USD">USD</option><option value="PLN">PLN</option><option value="CZK">CZK</option></select>
+                    <select id="fCurrency"><option value="CHF">CHF</option><option value="EUR">EUR</option><option value="UAH">UAH</option><option value="USD">USD</option><option value="PLN">PLN</option><option value="CZK">CZK</option></select>
                 </div>
             </div>
             <div class="form-row">
@@ -2080,7 +2080,7 @@ function getDetailSections() {
         ...OTHER_SECTIONS
     ];
 }
-const READONLY_FIELDS = ['pax_id','smartId','dateCreated','sourceSheet','cliId','bookingId','rteId','debt','dateArchive','archivedBy','archiveReason','archiveId'];
+const READONLY_FIELDS = ['pax_id','smartId','dateCreated','sourceSheet','cliId','bookingId','rteId','dateArchive','archivedBy','archiveReason','archiveId'];
 
 // ── Адреси Швейцарії (зупинки ЖД вокзалів) ──
 const ADDRESS_PRESETS_CH = [
@@ -2110,9 +2110,9 @@ const SELECT_OPTIONS = {
     leadStatus: ['Новий','В роботі','Підтверджено','Відмова','Відмова з завдатком','Відмова без завдатку'],
     payStatus: ['Не оплачено','Частково','Оплачено'],
     crmStatus: ['Активний','Архів'],
-    currency: ['UAH','EUR','CHF','USD','PLN','CZK'],
-    currencyDeposit: ['UAH','EUR','CHF','USD','PLN','CZK'],
-    currencyWeight: ['UAH','EUR','CHF','USD','PLN','CZK'],
+    currency: ['CHF','EUR','UAH','USD','PLN','CZK'],
+    currencyDeposit: ['UAH','CHF','EUR','USD','PLN','CZK'],
+    currencyWeight: ['UAH','CHF','EUR','USD','PLN','CZK'],
     direction: ['Україна-ЄВ','Європа-УК']
 };
 const LAYOUTS = {
@@ -4354,12 +4354,22 @@ async function saveInline(paxId, key, sheet, newVal) {
         if (['deposit','price','weightPrice'].includes(key)) {
             delete paymentsCache[paxId];
             // Оновлюємо локальний борг та статус оплати
+            // Але НЕ змінюємо статус якщо оператор вручну поставив "Оплачено"
             const debt = calcDebtFrontend(p);
             p['Борг'] = debt;
-            const dep = parseFloat(p['Завдаток']) || 0;
-            if (dep === 0) p['Статус оплати'] = 'Не оплачено';
-            else if (debt > 0) p['Статус оплати'] = 'Частково';
-            else p['Статус оплати'] = 'Оплачено';
+            const currentPayStatus = p['Статус оплати'] || '';
+            if (currentPayStatus !== 'Оплачено') {
+                const priceVal = parseFloat(p['Ціна квитка']) || 0;
+                const dep = parseFloat(p['Завдаток']) || 0;
+                if (priceVal === 0) { /* без ціни — не змінюємо статус */ }
+                else if (dep === 0) p['Статус оплати'] = 'Не оплачено';
+                else if (debt > 0) p['Статус оплати'] = 'Частково';
+                else p['Статус оплати'] = 'Оплачено';
+            }
+        }
+        // Якщо оператор вручну змінив статус оплати на "Оплачено" — скидаємо борг
+        if (key === 'payStatus' && newVal === 'Оплачено') {
+            p['Борг'] = 0;
         }
         render();
     } else {
@@ -4401,7 +4411,7 @@ function openAddModal() {
     document.getElementById('fSeats').value = '1';
     document.getElementById('fDate').value = '';
     document.getElementById('fDirection').value = currentDir === 'eu-ua' ? 'eu-ua' : 'ua-eu';
-    document.getElementById('fCurrency').value = 'UAH';
+    document.getElementById('fCurrency').value = 'CHF';
     document.getElementById('fCurrencyDeposit').value = 'UAH';
     document.getElementById('fCurrencyWeight').value = 'UAH';
     // Скидаємо SMS парсер
