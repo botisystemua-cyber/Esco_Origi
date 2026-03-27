@@ -6181,11 +6181,10 @@ function selectPaxCalDate(dateStr) {
         paxCalSelectedDate = null;
     } else {
         paxCalSelectedDate = dateStr;
-        // Скидаємо фільтр пасажирів на "Всі" щоб календар не залежав від вибраного напрямку/нових
-        currentDir = 'all';
+        // Синхронізуємо фільтр пасажирів з фільтром календаря
+        currentDir = paxCalDirFilter === 'all' ? 'all' : paxCalDirFilter;
         updatePcSidebarActive();
         updateMobileSidebarActive();
-        // На мобільному — закрити бокове меню щоб одразу бачити пасажирів
         if (window.innerWidth <= 900) closeSideMenu();
     }
     renderPaxCalendar();
