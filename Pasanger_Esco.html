@@ -4427,8 +4427,10 @@ function cancelInline(paxId, key) {
 
 // ── Швидка зміна статусу на картці ──
 function toggleCardStatusDD(paxId, key, el) {
-    // Закриваємо інші відкриті дропдауни
-    document.querySelectorAll('.card-status-dd.show').forEach(d => d.remove());
+    // Якщо вже відкритий — закриваємо
+    const existing = document.querySelector('.card-status-dd.show');
+    if (existing) { existing.remove(); if (el._statusDDOpen) { el._statusDDOpen = false; return; } }
+    el._statusDDOpen = true;
 
     const p = passengers.find(x => x['PAX_ID'] === paxId);
     if (!p) return;
@@ -4450,7 +4452,7 @@ function toggleCardStatusDD(paxId, key, el) {
 
     // Закриваємо при кліку деінде
     setTimeout(() => {
-        const close = (e) => { if (!dd.contains(e.target) && !el.contains(e.target)) { dd.remove(); document.removeEventListener('click', close); } };
+        const close = (e) => { if (!dd.contains(e.target) && !el.contains(e.target)) { dd.remove(); el._statusDDOpen = false; document.removeEventListener('click', close); } };
         document.addEventListener('click', close);
     }, 10);
 }
