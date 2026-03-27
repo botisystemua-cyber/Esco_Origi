@@ -341,10 +341,11 @@
         .badge-partial { background: #fef3c7; color: #d97706; }
         .badge-unpaid { background: #fee2e2; color: #dc2626; }
         .badge-notrip { background: #fef3c7; color: #d97706; }
-        .badge-clickable { cursor: pointer; position: relative; display: inline-block; }
+        .badge-clickable { cursor: pointer; display: inline-flex; align-items: center; gap: 1px; }
+        .badge-arrow { font-size: 8px; color: var(--text-secondary); margin-left: 1px; }
         .badge-clickable .badge { transition: opacity .15s; }
         .badge-clickable:hover .badge { opacity: 0.8; }
-        .card-status-dd { position: absolute; top: 100%; left: 0; z-index: 50; background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 4px; min-width: 140px; display: none; }
+        .card-status-dd { position: fixed; z-index: 250; background: white; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); padding: 4px; min-width: 160px; display: none; }
         .card-status-dd.show { display: block; }
         .card-status-dd-item { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .card-status-dd-item:hover { background: var(--bg-main); }
@@ -3837,8 +3838,8 @@ function renderCard(p) {
                             ${cf.includes('smartId') ? `<span class="card-smart-id" onclick="event.stopPropagation(); copyToClipboard('${smartId || ''}'); this.style.background='#d8b4fe'; setTimeout(()=>this.style.background='',400);" title="Натисни щоб скопіювати">SS: ${smartId || '—'}</span>` : ''}
                             ${cf.includes('name') ? `<span class="card-name">${name}</span>` : ''}
                             ${isRecent24h ? '<span class="badge badge-new24">🆕 NEW</span>' : ''}
-                            ${cf.includes('leadStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','leadStatus',this)">${lsBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Статус</span>'}</span>` : ''}
-                            ${cf.includes('payStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','payStatus',this)">${payBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Оплата</span>'}</span>` : ''}
+                            ${cf.includes('leadStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','leadStatus',this)">${lsBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Статус</span>'}<span class="badge-arrow">▾</span></span>` : ''}
+                            ${cf.includes('payStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','payStatus',this)">${payBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Оплата</span>'}<span class="badge-arrow">▾</span></span>` : ''}
                             ${cf.includes('debt') && debt > 0 ? '<span class="badge badge-debt">Борг: '+debt+'</span>' : ''}
                         </div>
                         ${cf.includes('route') ? routeHtml : ''}
@@ -4419,11 +4420,16 @@ function toggleCardStatusDD(paxId, key, el) {
     dd.innerHTML = options.map(opt =>
         `<div class="card-status-dd-item ${opt === currentVal ? 'active' : ''}" onclick="event.stopPropagation(); pickCardStatus('${paxId}','${key}','${opt.replace(/'/g,"\\'")}',this)">${opt}</div>`
     ).join('');
-    el.appendChild(dd);
+    document.body.appendChild(dd);
+
+    // Позиціонуємо під елементом
+    const rect = el.getBoundingClientRect();
+    dd.style.top = (rect.bottom + 4) + 'px';
+    dd.style.left = Math.max(4, Math.min(rect.left, window.innerWidth - 170)) + 'px';
 
     // Закриваємо при кліку деінде
     setTimeout(() => {
-        const close = (e) => { if (!dd.contains(e.target)) { dd.remove(); document.removeEventListener('click', close); } };
+        const close = (e) => { if (!dd.contains(e.target) && !el.contains(e.target)) { dd.remove(); document.removeEventListener('click', close); } };
         document.addEventListener('click', close);
     }, 10);
 }
