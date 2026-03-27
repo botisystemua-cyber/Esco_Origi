@@ -2392,17 +2392,30 @@ document.addEventListener('DOMContentLoaded', () => {
     showLoader('Завантаження...');
     Promise.all([
         apiPost('getAll', { sheet: 'all' }),
-        apiPost('getTrips', { filter: {} })
-    ]).then(([paxRes, tripRes]) => {
+        apiPost('getTrips', { filter: {} }),
+        apiPost('getRoutesList', {})
+    ]).then(([paxRes, tripRes, routeRes]) => {
         hideLoader();
         if (paxRes.ok) passengers = paxRes.data;
         if (tripRes.ok) trips = tripRes.data;
+        if (routeRes.ok && routeRes.data) {
+            allRouteSheets = routeRes.data.map(s => ({
+                sheetName: s.sheetName, rowCount: s.rowCount,
+                paxCount: s.paxCount || 0, parcelCount: s.parcelCount || 0,
+                headers: [], rows: null
+            }));
+            routes = allRouteSheets.filter(s => {
+                const n = (s.sheetName || '');
+                return n.startsWith('Маршрут_') && n !== 'Маршрут_Шаблон';
+            });
+            setCount('pcCountRoutes', routes.length);
+            setCount('mobileCountRoutes', routes.length);
+            renderRouteSidebar();
+        }
         updateAllCounts();
         updateTripFilterDropdown();
         updateTripAutoFilterDropdown();
         render();
-        // Підтягуємо маршрути для сайдбару
-        loadRoutes();
         // Перевірка дублів при завантаженні
         checkDuplicatesOnLoad();
     }).catch(() => { hideLoader(); render(); });
