@@ -3778,9 +3778,8 @@ function renderCard(p) {
 
     // Борг
     const priceN = parseFloat(p['Ціна квитка']) || 0;
-    const wpN = parseFloat(p['Ціна багажу']) || 0;
     const depN = parseFloat(p['Завдаток']) || 0;
-    const debt = Math.max(0, priceN + wpN - depN);
+    const debt = parseFloat(p['Борг']) || 0;
 
     const statusClass = leadStatus === 'Новий' ? 'status-new' : leadStatus === 'В роботі' ? 'status-work' : leadStatus === 'Підтверджено' ? 'status-confirmed' : leadStatus === 'Відмова' ? 'status-refused' : '';
     const isRecent24h = isNew24h(p);
