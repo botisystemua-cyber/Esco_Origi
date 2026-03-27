@@ -341,6 +341,14 @@
         .badge-partial { background: #fef3c7; color: #d97706; }
         .badge-unpaid { background: #fee2e2; color: #dc2626; }
         .badge-notrip { background: #fef3c7; color: #d97706; }
+        .badge-clickable { cursor: pointer; position: relative; display: inline-block; }
+        .badge-clickable .badge { transition: opacity .15s; }
+        .badge-clickable:hover .badge { opacity: 0.8; }
+        .card-status-dd { position: absolute; top: 100%; left: 0; z-index: 50; background: white; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); padding: 4px; min-width: 140px; display: none; }
+        .card-status-dd.show { display: block; }
+        .card-status-dd-item { padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .card-status-dd-item:hover { background: var(--bg-main); }
+        .card-status-dd-item.active { background: var(--primary); color: white; }
         .badge-debt { background: #fee2e2; color: #dc2626; font-weight: 800; }
         .badge-new24 { background: #fef3c7; color: #d97706; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 8px; animation: pulse-new24 2s ease-in-out infinite; }
         @keyframes pulse-new24 { 0%,100%{opacity:1} 50%{opacity:0.6} }
@@ -3829,7 +3837,8 @@ function renderCard(p) {
                             ${cf.includes('smartId') ? `<span class="card-smart-id" onclick="event.stopPropagation(); copyToClipboard('${smartId || ''}'); this.style.background='#d8b4fe'; setTimeout(()=>this.style.background='',400);" title="Натисни щоб скопіювати">SS: ${smartId || '—'}</span>` : ''}
                             ${cf.includes('name') ? `<span class="card-name">${name}</span>` : ''}
                             ${isRecent24h ? '<span class="badge badge-new24">🆕 NEW</span>' : ''}
-                            ${cf.includes('leadStatus') ? lsBadge : ''} ${cf.includes('payStatus') ? payBadge : ''}
+                            ${cf.includes('leadStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','leadStatus',this)">${lsBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Статус</span>'}</span>` : ''}
+                            ${cf.includes('payStatus') ? `<span class="badge-clickable" onclick="event.stopPropagation(); toggleCardStatusDD('${id}','payStatus',this)">${payBadge || '<span class="badge" style="background:#f1f5f9;color:#6b7280;">Оплата</span>'}</span>` : ''}
                             ${cf.includes('debt') && debt > 0 ? '<span class="badge badge-debt">Борг: '+debt+'</span>' : ''}
                         </div>
                         ${cf.includes('route') ? routeHtml : ''}
@@ -4392,6 +4401,56 @@ function cancelInline(paxId, key) {
     const colName = COL_MAP[key] || key;
     const el = document.getElementById('dv-' + paxId + '-' + key);
     if (el) el.textContent = formatFieldDisplay(key, p[colName]);
+}
+
+// ── Швидка зміна статусу на картці ──
+function toggleCardStatusDD(paxId, key, el) {
+    // Закриваємо інші відкриті дропдауни
+    document.querySelectorAll('.card-status-dd.show').forEach(d => d.remove());
+
+    const p = passengers.find(x => x['PAX_ID'] === paxId);
+    if (!p) return;
+    const colName = COL_MAP[key] || key;
+    const currentVal = p[colName] || '';
+    const options = SELECT_OPTIONS[key] || [];
+
+    const dd = document.createElement('div');
+    dd.className = 'card-status-dd show';
+    dd.innerHTML = options.map(opt =>
+        `<div class="card-status-dd-item ${opt === currentVal ? 'active' : ''}" onclick="event.stopPropagation(); pickCardStatus('${paxId}','${key}','${opt.replace(/'/g,"\\'")}',this)">${opt}</div>`
+    ).join('');
+    el.appendChild(dd);
+
+    // Закриваємо при кліку деінде
+    setTimeout(() => {
+        const close = (e) => { if (!dd.contains(e.target)) { dd.remove(); document.removeEventListener('click', close); } };
+        document.addEventListener('click', close);
+    }, 10);
+}
+
+async function pickCardStatus(paxId, key, newVal, itemEl) {
+    const p = passengers.find(x => x['PAX_ID'] === paxId);
+    if (!p) return;
+    const colName = COL_MAP[key] || key;
+    const oldVal = p[colName] || '';
+    if (newVal === oldVal) { itemEl.closest('.card-status-dd')?.remove(); return; }
+
+    p[colName] = newVal;
+    // Якщо статус оплати → "Оплачено", скидаємо борг
+    if (key === 'payStatus' && newVal === 'Оплачено') p['Борг'] = 0;
+
+    itemEl.closest('.card-status-dd')?.remove();
+    render();
+
+    const shName = p._sheet || '';
+    const res = await apiPost('updateField', { sheet: shName, pax_id: paxId, col: colName, value: newVal });
+    if (res.ok) {
+        showToast('✅ ' + colName + ': ' + newVal);
+    } else {
+        p[colName] = oldVal;
+        showToast('❌ ' + (res.error || 'Помилка'));
+        render();
+    }
 }
 
 // ================================================================
