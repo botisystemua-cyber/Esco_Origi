@@ -6194,10 +6194,16 @@ function selectPaxCalDate(dateStr) {
         paxCalSelectedDate = null;
     } else {
         paxCalSelectedDate = dateStr;
-        // Синхронізуємо фільтр пасажирів з фільтром календаря
-        currentDir = paxCalDirFilter === 'all' ? 'all' : paxCalDirFilter;
+        // Переключаємо на вид пасажирів (якщо були в маршрутах/рейсах)
+        currentView = 'pax';
+        currentDir = 'all';
+        document.getElementById('passengersView').classList.remove('hidden');
+        document.getElementById('tripsView').classList.remove('active');
+        document.getElementById('routesView').style.display = 'none';
+        document.getElementById('archiveView').style.display = 'none';
         updatePcSidebarActive();
         updateMobileSidebarActive();
+        updateNavActive('pax');
         if (window.innerWidth <= 900) closeSideMenu();
     }
     renderPaxCalendar();
