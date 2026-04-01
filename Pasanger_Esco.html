@@ -1442,7 +1442,7 @@
 <!-- BOTTOM NAV (Mobile) -->
 <nav class="bottom-nav">
     <button class="nav-item active" id="navPax" onclick="showPaxView('all')"><span>👥</span>Пасажири</button>
-    <button class="nav-item" id="navParcels" onclick="showToast('📦 Модуль Посилки не підключено. Зверніться до BotiSystem для підключення.', 4000)"><span>📦</span>Посилки</button>
+    <button class="nav-item" id="navParcels" onclick="window.location.href=POSYLKY_URL"><span>📦</span>Посилки</button>
     <button class="nav-item" onclick="silentSync(true)"><span>🔄</span>Синхр.</button>
     <button class="nav-item" onclick="openColumnConfigurator()"><span>⚙️</span>Колонки</button>
     <button class="nav-item" onclick="openAddModal()"><span>➕</span>Додати</button>
@@ -1969,6 +1969,7 @@ function initMapsAPI() {
 // CONFIG
 // ================================================================
 const API_URL = 'https://script.google.com/macros/s/AKfycbwJqVtEEynRIk7Fa77f5dzEvWEmqLvWW5SIRJYe8NiLyezUWBPMMLKZfe0IfyBjSuvW-g/exec';
+const POSYLKY_URL = 'POSYLKY_APP_URL_HERE'; // ← Замініть на URL посилкового додатку
 const COL_MAP = {
     pax_id:'PAX_ID', smartId:'Ід_смарт', direction:'Напрям', sourceSheet:'SOURCE_SHEET',
     dateCreated:'Дата створення', name:'Піб', phone:'Телефон пасажира',
