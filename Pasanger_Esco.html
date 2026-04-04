@@ -2186,6 +2186,7 @@ let activeRouteIdx = null; // Індекс обраного маршруту д�
 let routeTypeFilter = 'all'; // all | pax | parcel
 let routeStatusFilter = 'all'; // all | Новий | Підтверджено | В роботі | Відмова
 let routePayFilter = 'all'; // all | Не оплачено | Частково | Оплачено
+let _unreadCounts = {}; // { cli_id: count }
 let routeSelectedIds = new Set();
 let routeOpenDetailsId = null;
 let routeOpenActionsId = null;
@@ -2447,8 +2448,9 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all([
         apiPost('getAll', { sheet: 'all' }),
         apiPost('getTrips', { filter: {} }),
-        apiPost('getRoutesList', {})
-    ]).then(([paxRes, tripRes, routeRes]) => {
+        apiPost('getRoutesList', {}),
+        apiPost('getUnreadCounts', {})
+    ]).then(([paxRes, tripRes, routeRes, unreadRes]) => {
         hideLoader();
         if (paxRes.ok) {
             passengers = paxRes.data;
@@ -2485,6 +2487,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setCount('mobileCountRoutes', routes.length);
             renderRouteSidebar();
         }
+        if (unreadRes && unreadRes.ok) _unreadCounts = unreadRes.data || {};
         updateAllCounts();
         updateTripFilterDropdown();
         updateTripAutoFilterDropdown();
