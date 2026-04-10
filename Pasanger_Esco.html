@@ -2351,12 +2351,7 @@ async function apiPost(action, data) {
 // INIT
 // ================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Якщо менеджер не увійшов — редирект на Config CRM
     updateAvatarUI();
-    if (!getManagerName()) {
-        window.location.href = CONFIG_CRM_URL;
-        return;
-    }
 
     showLoader('Завантаження...');
     Promise.all([
