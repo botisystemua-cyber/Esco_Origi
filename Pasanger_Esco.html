@@ -281,8 +281,12 @@
         .detail-micro-btn:hover { background: var(--primary); color: white; }
         .detail-inline-edit { width: 100%; border: 1px solid var(--primary); border-radius: 4px; padding: 2px 4px; font-size: 12px; font-weight: 600; font-family: inherit; outline: none; background: white; }
         select.detail-inline-edit { padding: 3px 4px; cursor: pointer; appearance: auto; }
-        .detail-section { margin-bottom: 10px; }
-        .detail-section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); padding: 6px 0 4px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+        .detail-tabs { display: flex; gap: 6px; padding: 6px 0 8px; flex-wrap: wrap; }
+        .detail-tab-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; background: #fff; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); white-space: nowrap; }
+        .detail-tab-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .detail-tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .detail-section { display: none; }
+        .detail-section.active { display: block; }
 
         /* PAYMENTS TAB */
         .payments-loading { text-align: center; padding: 24px; color: var(--text-secondary); font-size: 12px; }
@@ -320,6 +324,23 @@
         .messenger-popup-cancel { display: block; width: 100%; margin-top: 10px; padding: 10px; border: none; border-radius: 10px; background: var(--bg-main); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
         .messenger-popup-cancel:hover { background: #e2e8f0; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .chat-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1100;display:none;align-items:center;justify-content:center;padding:10px; }
+        .chat-overlay.open { display:flex; }
+        .chat-modal { background:#fff;width:100%;max-width:440px;height:80vh;max-height:600px;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .chat-header { background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between; }
+        .chat-title { font-size:14px;font-weight:700; }
+        .chat-close { background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:0 4px; }
+        .chat-messages { flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:#f5f7fa; }
+        .chat-bubble { max-width:80%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.4;word-wrap:break-word; }
+        .chat-bubble.client { align-self:flex-start;background:#e2e8f0;color:#1e293b;border-bottom-left-radius:4px; }
+        .chat-bubble.manager { align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px; }
+        .chat-bubble-name { font-size:10px;font-weight:700;margin-bottom:2px;opacity:0.7; }
+        .chat-bubble-time { font-size:9px;opacity:0.5;margin-top:2px;text-align:right; }
+        .chat-input-bar { display:flex;gap:6px;padding:10px 12px;border-top:1px solid var(--border);background:#fff; }
+        .chat-input { flex:1;border:1px solid var(--border);border-radius:20px;padding:8px 14px;font-size:13px;font-family:inherit;outline:none; }
+        .chat-input:focus { border-color:var(--primary); }
+        .chat-send-btn { width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center; }
+        .chat-send-btn:hover { background:var(--primary-dark); }
         @media (max-width: 768px) {
             .messenger-overlay.show { align-items: center; justify-content: flex-end; }
             .messenger-popup { border-radius: 12px 0 0 12px; padding: 10px 8px; min-width: 0; max-width: 130px; width: 130px; height: auto; animation: slideInRight .2s ease-out; box-shadow: -4px 0 16px rgba(0,0,0,0.15); }
@@ -859,7 +880,8 @@
         /* BOTTOM NAV (Mobile) */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 6px 10px; z-index: 100; display: flex; justify-content: space-around; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 12px; border: none; background: none; font-family: inherit; font-size: 9px; color: var(--text-secondary); cursor: pointer; }
-        .nav-item.active { color: var(--accent); }
+        .nav-item.active { color: var(--primary); font-weight: 700; position: relative; }
+        .nav-item.active::after { content: ''; position: absolute; top: -2px; left: 50%; transform: translateX(-50%); width: 24px; height: 3px; background: var(--primary); border-radius: 0 0 3px 3px; }
         .nav-item span:first-child { font-size: 18px; }
 
         /* TRIP ASSIGN DROPDOWN (on lead card) */
@@ -1663,6 +1685,23 @@
     </div>
 </div>
 
+<!-- CLIENT CHAT MODAL -->
+<div class="chat-overlay" id="chatOverlay" onclick="if(event.target===this)closeClientChat()">
+  <div class="chat-modal">
+    <div class="chat-header">
+      <span class="chat-title" id="chatTitle">💬 Чат клієнт</span>
+      <button class="chat-close" onclick="closeClientChat()">&times;</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div style="text-align:center;padding:40px;color:var(--text-secondary);font-size:12px;">Завантаження...</div>
+    </div>
+    <div class="chat-input-bar">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Написати повідомлення..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
 <!-- TRIP ASSIGN MODAL -->
 <div class="trip-modal-overlay" id="tripAssignOverlay" onclick="if(event.target===this)closeTripModal()">
     <div class="trip-modal">
@@ -2026,7 +2065,7 @@ function initMapsAPI() {
 // ================================================================
 // CONFIG
 // ================================================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbxWhiRBNZBDi0DB8D3nojJlqEwb17XNhL1o7SbbNsdUVha_ilT1ZihNmk5qMOJkaukg6g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxPdal8UIvD1gPYVKfDZ6IO1oMCSxOesrft3B06OXbPo9jOEkzKxISTS7vG4xqGnHA8tA/exec';
 const COL_MAP = {
     pax_id:'PAX_ID', smartId:'Ід_смарт', direction:'Напрям', sourceSheet:'SOURCE_SHEET',
     dateCreated:'Дата створення', name:'Піб', phone:'Телефон пасажира',
@@ -2147,6 +2186,7 @@ let activeRouteIdx = null; // Індекс обраного маршруту д�
 let routeTypeFilter = 'all'; // all | pax | parcel
 let routeStatusFilter = 'all'; // all | Новий | Підтверджено | В роботі | Відмова
 let routePayFilter = 'all'; // all | Не оплачено | Частково | Оплачено
+let _unreadCounts = {}; // { cli_id: count }
 let routeSelectedIds = new Set();
 let routeOpenDetailsId = null;
 let routeOpenActionsId = null;
@@ -2408,8 +2448,9 @@ document.addEventListener('DOMContentLoaded', () => {
     Promise.all([
         apiPost('getAll', { sheet: 'all' }),
         apiPost('getTrips', { filter: {} }),
-        apiPost('getRoutesList', {})
-    ]).then(([paxRes, tripRes, routeRes]) => {
+        apiPost('getRoutesList', {}),
+        apiPost('getUnreadCounts', {})
+    ]).then(([paxRes, tripRes, routeRes, unreadRes]) => {
         hideLoader();
         if (paxRes.ok) {
             passengers = paxRes.data;
@@ -2446,6 +2487,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setCount('mobileCountRoutes', routes.length);
             renderRouteSidebar();
         }
+        if (unreadRes && unreadRes.ok) _unreadCounts = unreadRes.data || {};
         updateAllCounts();
         updateTripFilterDropdown();
         updateTripAutoFilterDropdown();
@@ -3106,9 +3148,12 @@ function renderRouteCard(r, idx, sheetName) {
         </div>`;
     }
 
-    const sectionsHtml = sections.map(s => `
-        <div class="detail-section">
-            <div class="detail-section-title">${s.title}</div>
+    const tabsBar = `<div class="detail-tabs" onclick="event.stopPropagation()">` +
+        sections.map((s, i) => `<button class="detail-tab-btn${i === 0 ? ' active' : ''}" onclick="switchDetailTab('${rteId}',${i},this)">${s.title}</button>`).join('') +
+        `</div>`;
+
+    const sectionsHtml = sections.map((s, i) => `
+        <div class="detail-section${i === 0 ? ' active' : ''}" data-tab-id="${rteId}" data-tab-idx="${i}">
             <div class="details-grid">${s.fields.map(renderDetailField).join('')}</div>
         </div>
     `).join('');
@@ -3141,6 +3186,7 @@ function renderRouteCard(r, idx, sheetName) {
             </div>
         </div>
         <div class="route-card-details ${isDetailsOpen ? 'show' : ''}" id="rte-details-${rteId}">
+            ${tabsBar}
             ${sectionsHtml}
             <!-- Кнопки дій для ліда: 2 рядки -->
             <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
@@ -3153,6 +3199,15 @@ function renderRouteCard(r, idx, sheetName) {
             </div>
         </div>
     </div>`;
+}
+
+// ── Перемикання табів у деталях картки ──
+function switchDetailTab(rteId, idx, btn) {
+    btn.parentElement.querySelectorAll('.detail-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll(`.detail-section[data-tab-id="${rteId}"]`).forEach(s => {
+        s.classList.toggle('active', Number(s.dataset.tabIdx) === idx);
+    });
 }
 
 // ── Деталі картки маршруту ──
@@ -4216,16 +4271,18 @@ function toggleCardActions(id) {
 
 // Відкрити popup з кнопками месенджерів
 // phone — телефон пасажира, smartId — ID SmartSender (може бути пустий)
-function openMessengerPopup(phone, smartId) {
+function openMessengerPopup(phone, smartId, cliId) {
     const grid = document.getElementById('messengerGrid');
     const cleanPhone = (phone || '').replace(/[^+\d]/g, '');
     var smartBtn = `<button class="messenger-popup-item" onclick="openSmartSender('${smartId || ''}')">🤖 <span style="color:#ff6600">Smart</span></button>`;
+    var chatBtn = cliId ? `<button class="messenger-popup-item" onclick="closeMessengerPopup();openClientChat('${cliId}','${cleanPhone}')">💬 <span style="color:#8b5cf6">Чат клієнт</span></button>` : '';
     grid.innerHTML = `
         <button class="messenger-popup-item" onclick="closeMessengerPopup(); window.open('tel:${cleanPhone}')">📞 <span style="color:var(--primary)">Дзвінок</span></button>
         <button class="messenger-popup-item" onclick="openMessenger('viber','${cleanPhone}')">💬 <span style="color:#7360f2">Viber</span></button>
         <button class="messenger-popup-item" onclick="openMessenger('telegram','${cleanPhone}')">✈️ <span style="color:#0088cc">Telegram</span></button>
         <button class="messenger-popup-item" onclick="openMessenger('whatsapp','${cleanPhone}')">📱 <span style="color:#25d366">WhatsApp</span></button>
         ${smartBtn}
+        ${chatBtn}
     `;
     document.getElementById('messengerOverlay').classList.add('show');
 }
@@ -4233,6 +4290,70 @@ function openMessengerPopup(phone, smartId) {
 // Закрити popup месенджерів
 function closeMessengerPopup() {
     document.getElementById('messengerOverlay').classList.remove('show');
+}
+
+// ===== CLIENT CHAT =====
+var _chatCliId = null;
+var _chatPhone = null;
+var _chatPollTimer = null;
+var _chatMessages = [];
+
+function openClientChat(cliId, phone) {
+  _chatCliId = cliId;
+  _chatPhone = phone;
+  document.getElementById('chatTitle').textContent = '💬 Чат клієнт · ' + (phone || cliId);
+  document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);font-size:12px;">⏳ Завантаження...</div>';
+  document.getElementById('chatInput').value = '';
+  document.getElementById('chatOverlay').classList.add('open');
+  loadChatMessages();
+  _chatPollTimer = setInterval(loadChatMessages, 10000);
+}
+
+function closeClientChat() {
+  document.getElementById('chatOverlay').classList.remove('open');
+  if (_chatPollTimer) { clearInterval(_chatPollTimer); _chatPollTimer = null; }
+  _chatCliId = null;
+}
+
+async function loadChatMessages() {
+  if (!_chatCliId) return;
+  try {
+    var res = await apiPost('getClientMessages', { cli_id: _chatCliId });
+    if (res.ok && res.data) {
+      _chatMessages = res.data;
+      renderChatMessages();
+      await apiPost('markClientRead', { cli_id: _chatCliId });
+    }
+  } catch(e) { console.error('Chat load error:', e); }
+}
+
+function renderChatMessages() {
+  var container = document.getElementById('chatMessages');
+  if (!_chatMessages.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary);font-size:12px;">Повідомлень поки немає. Напишіть першим!</div>';
+    return;
+  }
+  container.innerHTML = _chatMessages.map(function(m) {
+    var isManager = m.role === 'manager';
+    var cls = isManager ? 'manager' : 'client';
+    var name = m.sender_name || (isManager ? 'Менеджер' : 'Клієнт');
+    var time = m.date ? new Date(m.date).toLocaleString('uk-UA', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    return '<div class="chat-bubble ' + cls + '"><div class="chat-bubble-name">' + name + '</div>' + (m.text || '') + '<div class="chat-bubble-time">' + time + '</div></div>';
+  }).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+  var input = document.getElementById('chatInput');
+  var text = (input.value || '').trim();
+  if (!text || !_chatCliId) return;
+  input.value = '';
+  _chatMessages.push({ role: 'manager', sender_name: 'Менеджер', text: text, date: new Date().toISOString() });
+  renderChatMessages();
+  try {
+    var res = await apiPost('sendManagerMessage', { cli_id: _chatCliId, text: text, sender_name: 'Менеджер' });
+    if (!res.ok) showToast('❌ Помилка відправки');
+  } catch(e) { showToast('❌ Помилка: ' + e.message); }
 }
 
 // Відкрити конкретний месенджер з контактом
