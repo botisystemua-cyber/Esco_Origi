@@ -1476,27 +1476,6 @@
     </div>
 </div>
 
-<!-- MANAGER LOGIN MODAL -->
-<div class="modal-overlay" id="managerModal" onclick="if(event.target===this && getManagerName())closeModal('managerModal')">
-    <div class="modal" style="max-width:380px">
-        <div class="modal-header">
-            <div class="modal-title" id="managerModalTitle">🔐 Вхід менеджера</div>
-            <button class="modal-close" onclick="if(getManagerName())closeModal('managerModal')" style="display:none" id="managerModalClose">✕</button>
-        </div>
-        <div style="padding:16px" id="managerLoginContent"></div>
-        <div id="installBanner" style="display:none;padding:0 16px 16px">
-            <div style="border-top:1px solid var(--border);padding-top:12px">
-                <button onclick="installApp()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
-                    📲 Встановити на пристрій
-                </button>
-                <div style="text-align:center;font-size:10px;color:var(--text-secondary);margin-top:6px">Додати на робочий екран як додаток</div>
-            </div>
-        </div>
-        <div style="padding:0 16px 16px">
-            <button class="onboard-tutorial-btn" onclick="closeModal('managerModal');obOpenCatalog()">🎓 Навчання</button>
-        </div>
-    </div>
-</div>
 
 <!-- BOTTOM NAV (Mobile) -->
 <nav class="bottom-nav">
@@ -2210,18 +2189,11 @@ let editingTripCalId = null;
 let paymentsCache = {}; // Кеш платежів: { PAX_ID: [...] }
 
 // ================================================================
-// MANAGER LOGIN — авторизація через Config API (логін + пароль)
+// MANAGER — вхід через Config CRM (зовнішній додаток)
 // ================================================================
-var CONFIG_API_URL = 'https://script.google.com/macros/s/AKfycbwjVyjbIISoN0FYDMRhCaYHMwCFRM8FlxI6y1ODbnRlLcNMCHEfW5wYukSQcLTfEBZh/exec';
+var CONFIG_CRM_URL = 'https://botisystem.com/Esco_Express/config-crm';
 var MANAGER_ACTIVE_KEY = 'oksi_manager_name';
 var MANAGER_STAFF_ID_KEY = 'oksi_manager_staff_id';
-
-async function sha256(message) {
-    var msgBuffer = new TextEncoder().encode(message);
-    var hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    var hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-}
 
 function getManagerName() {
     return localStorage.getItem(MANAGER_ACTIVE_KEY) || '';
@@ -2234,10 +2206,6 @@ function setManagerName(name) {
 
 function getManagerStaffId() {
     return localStorage.getItem(MANAGER_STAFF_ID_KEY) || '';
-}
-
-function setManagerStaffId(id) {
-    localStorage.setItem(MANAGER_STAFF_ID_KEY, id);
 }
 
 function updateAvatarUI() {
@@ -2253,113 +2221,8 @@ function updateAvatarUI() {
     }
 }
 
-function renderManagerLogin() {
-    var content = document.getElementById('managerLoginContent');
-    var titleEl = document.getElementById('managerModalTitle');
-    var closeBtn = document.getElementById('managerModalClose');
-    var currentName = getManagerName();
-
-    if (currentName) {
-        // Показуємо профіль + кнопку виходу
-        if (titleEl) titleEl.textContent = '👤 ' + currentName;
-        if (closeBtn) closeBtn.style.display = '';
-        var initials = currentName.trim().split(/\s+/).map(function(p) { return p[0]; }).join('').substring(0, 2).toUpperCase();
-        content.innerHTML =
-            '<div style="text-align:center;padding:8px 0">' +
-                '<div style="width:64px;height:64px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:22px;margin:0 auto 12px">' + initials + '</div>' +
-                '<div style="font-weight:700;font-size:16px;color:var(--text-primary)">' + currentName + '</div>' +
-                '<div style="font-size:12px;color:var(--text-secondary);margin-top:2px">Менеджер</div>' +
-                '<div style="margin-top:16px">' +
-                    '<button onclick="handleManagerLogout()" style="width:100%;padding:12px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;border-radius:8px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer">🚪 Вийти з системи</button>' +
-                '</div>' +
-            '</div>';
-    } else {
-        // Показуємо форму входу
-        if (titleEl) titleEl.textContent = '🔐 Вхід менеджера';
-        if (closeBtn) closeBtn.style.display = 'none';
-        content.innerHTML =
-            '<div style="margin-bottom:12px">' +
-                '<label style="display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Логін</label>' +
-                '<input type="text" id="mgrLoginInput" placeholder="Введіть логін" autocomplete="username" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box" onkeydown="if(event.key===\'Enter\')document.getElementById(\'mgrPwdInput\').focus()">' +
-            '</div>' +
-            '<div style="margin-bottom:12px">' +
-                '<label style="display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Пароль</label>' +
-                '<div style="position:relative">' +
-                    '<input type="password" id="mgrPwdInput" placeholder="Введіть пароль" autocomplete="current-password" style="width:100%;padding:10px 12px;padding-right:40px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;box-sizing:border-box" onkeydown="if(event.key===\'Enter\')doManagerLogin()">' +
-                    '<button onclick="toggleMgrPwd()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:4px" id="mgrPwdToggle" title="Показати/сховати пароль">👁️</button>' +
-                '</div>' +
-            '</div>' +
-            '<div id="mgrLoginError" style="display:none;padding:8px 12px;background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:600;color:#dc2626;margin-bottom:12px"></div>' +
-            '<button onclick="doManagerLogin()" id="mgrLoginBtn" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border:none;border-radius:8px;font-family:inherit;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">' +
-                '🔑 Увійти' +
-            '</button>';
-        setTimeout(function() {
-            var inp = document.getElementById('mgrLoginInput');
-            if (inp) inp.focus();
-        }, 100);
-    }
-}
-
-function toggleMgrPwd() {
-    var inp = document.getElementById('mgrPwdInput');
-    if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
-}
-
-async function doManagerLogin() {
-    var loginVal = (document.getElementById('mgrLoginInput').value || '').trim();
-    var pwdVal = (document.getElementById('mgrPwdInput').value || '').trim();
-    var errorEl = document.getElementById('mgrLoginError');
-    var btnEl = document.getElementById('mgrLoginBtn');
-
-    if (!loginVal || !pwdVal) {
-        errorEl.textContent = 'Введіть логін та пароль';
-        errorEl.style.display = '';
-        return;
-    }
-
-    btnEl.disabled = true;
-    btnEl.innerHTML = '⏳ Перевірка...';
-    errorEl.style.display = 'none';
-
-    try {
-        var passwordHash = await sha256(pwdVal);
-        var res = await fetch(CONFIG_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ action: 'login', role: 'manager', login: loginVal, password: passwordHash })
-        });
-        var data = await res.json();
-
-        if (data.success && data.user) {
-            setManagerName(data.user.name);
-            setManagerStaffId(data.user.staffId || '');
-            closeModal('managerModal');
-            showToast('✅ Вхід: ' + data.user.name);
-            checkOnboardingAutoStart();
-        } else {
-            errorEl.textContent = data.error || 'Помилка авторизації';
-            errorEl.style.display = '';
-        }
-    } catch (e) {
-        errorEl.textContent = 'Помилка мережі. Спробуйте ще раз.';
-        errorEl.style.display = '';
-    }
-
-    btnEl.disabled = false;
-    btnEl.innerHTML = '🔑 Увійти';
-}
-
-function handleManagerLogout() {
-    localStorage.removeItem(MANAGER_ACTIVE_KEY);
-    localStorage.removeItem(MANAGER_STAFF_ID_KEY);
-    updateAvatarUI();
-    renderManagerLogin();
-    showToast('Ви вийшли з системи');
-}
-
 function openManagerModal() {
-    renderManagerLogin();
-    openModal('managerModal');
+    window.location.href = CONFIG_CRM_URL;
 }
 
 // ================================================================
@@ -2488,10 +2351,11 @@ async function apiPost(action, data) {
 // INIT
 // ================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Запит менеджера при першому відкритті
+    // Якщо менеджер не увійшов — редирект на Config CRM
     updateAvatarUI();
     if (!getManagerName()) {
-        openManagerModal();
+        window.location.href = CONFIG_CRM_URL;
+        return;
     }
 
     showLoader('Завантаження...');
